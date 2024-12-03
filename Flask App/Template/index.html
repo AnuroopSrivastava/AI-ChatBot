@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent AI ChatBot</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/chatbot2.png') }}">
+
+    <!-- Fonts and styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            background-image: 
+                url("{{ url_for('static', filename='images/background.png') }}"), 
+                url("{{ url_for('static', filename='images/Robot.png') }}");
+            background-size: cover, 40%;
+            background-position: center, center 120%;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 58px;
+            color: transparent;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #7a1f98, #4e5bff); /* Purple to blue gradient */
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2), 0 0 25px rgba(255, 255, 255, 0.6); /* Subtle glow effect */
+            margin-top: 35px;
+            padding: 10px;
+            transition: transform 0.3s ease, text-shadow 0.3s ease, letter-spacing 0.3s ease;
+            font-family: 'Poppins', sans-serif; /* Modern font */
+            line-height: 1.2;
+        }
+    
+        h1:hover {
+            transform: scale(1.05); /* Slight zoom effect */
+            letter-spacing: 5px; /* Wider letter-spacing on hover */
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.6), 3px 3px 10px rgba(0, 0, 0, 0.3); /* Enhanced glow */
+        }
+    
+        h1:active {
+            transform: scale(0.98); /* Slight shrink effect on click */
+        }
+    
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 40px; /* Adjust font size on smaller screens */
+            }
+        }
+    
+        /* Adding a smooth typing animation to the text */
+        @keyframes typingEffect {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+    
+        #header {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 0;
+            animation: typingEffect 3s steps(5000) forwards, fadeIn 0.7s ease-in-out forwards;
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #about-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #2460f8;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s ease-in-out;
+            font-size: 16px;
+        }
+
+        #about-button:hover {
+            background-color: #218838;
+            transform: scale(1.1); /* Zoom effect on hover */
+        }
+
+        #chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 16px;
+        }
+
+        #chat-toggle {
+            background-image: url("{{ url_for('static', filename='images/chatbot1.png') }}");
+            background-size: 100% 100%;
+            background-position: center;
+            background-color: white;
+            width: 90px;
+            height: 90px;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #chat-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        #chat-content {
+            display: none;
+            width: 350px;
+            height: 450px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            font-size: 16px;
+        }
+
+        #chat-messages {
+            height: 370px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        #chat-input {
+            display: flex;
+            border-top: 1px solid #efefef;
+            padding: 10px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        #chat-input input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            margin-right: 10px;
+            outline: none;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-input button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #chat-input button:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 25px;
+            display: inline-block;
+            max-width: 80%;
+            word-wrap: break-word;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .received {
+            background-color: #efefef;
+            color: black;
+        }
+
+        .message.user {
+            background-color: #007bff;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        #chat-messages {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .typing-indicator {
+            font-size: 16px;
+            color: #888;
+            margin-top: 10px;
+            display: none;
+            font-style: italic;
+        }
+
+        .bot-message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* Modal Styles */
+        #about-modal {
+            display: none;  /* Ensure the modal is hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0); /* Subtle gradient background */
+            border-radius: 15px;
+            padding: 20px;
+            width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: absolute;  /* Position absolute within the modal */
+            top: 80%;
+            left: 80%;
+            transform: translate(-145%, -160%); /* Center the modal */
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .modal-close {
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #007bff;
+        }
+
+        .modal-body {
+            margin: 15px 0;
+            color: #555;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .modal-body ul {
+            padding-left: 20px;
+        }
+
+        .modal-body li {
+            margin: 8px 0;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .modal-footer button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .modal-footer button:hover {
+            background-color: #0056b3;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1 id="header">Smart Buddy</h1>
+
+    <button id="about-button">About</button> <!-- About button -->
+
+    <!-- About Modal -->
+    <div id="about-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000;">
+        <div class="modal-content" style="background: linear-gradient(145deg, #ffffff, #f0f0f0); border-radius: 15px; padding: 20px; width: 450px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                <h2 style="margin: 0; font-size: 24px; color: #333;">About Smart Buddy</h2>
+                <span class="modal-close" id="modal-close" style="font-size: 24px; color: #888; cursor: pointer; transition: color 0.3s ease;">&times;</span>
+            </div>
+            <div class="modal-body" style="margin: 15px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                <p>Smart Buddy is an advanced AI-powered chatbot designed to help you with your questions and tasks. 
+                    Powered by cutting-edge natural language processing (NLP) and artificial intelligence (AI) technologies, 
+                    Smart Buddy provides intelligent, context-aware responses to ensure a seamless conversational experience. 
+                    Whether you're looking for information or just want to chat, Smart Buddy is here to assist you anytime, anywhere!</p>
+                <h3>Contributors:</h3>
+                <ul style="padding-left: 20px;">
+                    <li style="margin: 8px 0;"><strong>Anuroop Srivastava</strong> - Frontend & Backend Developer</li>
+                    <li style="margin: 8px 0;"><strong>Vishesh Jaiswal</strong> - UI/UX & Backend Developer</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="text-align: right;">
+                <button id="close-modal-btn" style="background-color: #007bff; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="chat-box">
+        <button id="chat-toggle"></button> <!-- Chat icon with image -->
+        <div id="chat-content">
+            <div id="chat-messages"></div>
+            <div id="typing-indicator" class="typing-indicator">Typing...</div>
+            <div id="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+    // Hover effect for the header
+    $('#header').hover(function() {
+        $(this).css('transform', 'scale(1.1)');
+    }, function() {
+        $(this).css('transform', 'scale(1)');
+    });
+
+    // Click event for h1 to reload the page
+    $('#header').click(function() {
+        location.reload(); // Reload the page
+    });
+
+    // Toggle chat window
+    $('#chat-toggle').click(function() {
+        $('#chat-content').slideToggle('fast');
+    });
+
+    $('#send-button').click(function() {
+        sendMessage();
+    });
+
+    $('#user-input').keypress(function(e) {
+        if(e.which == 13) {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        var message = $('#user-input').val();
+        if(message.trim() != '') {
+            $('#chat-messages').append('<div class="message user">' + message + '</div>');
+            $('#user-input').val('');
+            $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+
+            $('#typing-indicator').show(); // Show typing indicator
+
+            $.ajax({
+                url: '/handle_message',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ message: message }),
+                success: function(data) {
+                    setTimeout(function() {
+                        $('#typing-indicator').hide(); // Hide typing indicator
+                        $('#chat-messages').append('<div class="message received">' + data.response + '</div>');
+                        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+                    }, 1500);
+                }
+            });
+        }
+    }
+
+    // Open the About modal
+    $('#about-button').click(function() {
+        $('#about-modal').fadeIn(300); // Show the modal
+        $('body').css('overflow', 'hidden'); // Prevent background scrolling
+        centerModal(); // Ensure modal is centered dynamically
+    });
+
+    // Close the modal on button click or close icon
+    $('#modal-close, #close-modal-btn').click(function() {
+        $('#about-modal').fadeOut(300); // Hide the modal
+        $('body').css('overflow', 'auto'); // Restore background scrolling
+    });
+
+    // Close the modal when clicking outside the modal content
+    $(window).click(function(event) {
+        if (event.target == document.getElementById('about-modal')) {
+            $('#about-modal').fadeOut(300); // Hide the modal
+            $('body').css('overflow', 'auto'); // Restore background scrolling
+        }
+    });
+
+    // Dynamically center the modal (in case content changes dynamically)
+    function centerModal() {
+        const modalContent = $('.modal-content');
+        const windowHeight = $(window).height();
+        const modalHeight = modalContent.outerHeight();
+
+        // Vertically center the modal content
+        if (modalHeight < windowHeight) {
+            modalContent.css('margin-top', (windowHeight - modalHeight) / 2);
+        } else {
+            modalContent.css('margin-top', '20px'); // Add a top margin for long content
+        }
+    }
+
+    // Recalculate modal position on window resize
+    $(window).resize(function() {
+        if ($('#about-modal').is(':visible')) {
+            centerModal();
+        }
+    });
+});
+
+    </script>
+
+</body>
+</html>
